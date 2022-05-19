@@ -1,6 +1,6 @@
 {
     "doc": "https://github.com/thingsdb/module-go-dutycalls#readme",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "main": {
         "linux/386": "bin/dutycalls_linux_386.bin",
         "linux/amd64": "bin/dutycalls_linux_amd64.bin",
@@ -17,30 +17,46 @@
             "doc": "Create a new ticket",
             "defaults": {
                 "handler": "new-ticket",
-                "deep": 1
+                "deep": 1,
+                "load": true
             },
             "argmap": ["channel", "ticket"]
         },
         "get_ticket": {
-            "doc": "Get a ticket from a given SID",
+            "doc": "Get a ticket",
             "defaults": {
-                "handler": "get-ticket"
+                "handler": "get-ticket",
+                "deep": 0,
+                "load": true
             },
             "argmap": ["sid"]
         },
         "get_tickets": {
-            "doc": "Get tickets for a list of SID's",
+            "doc": "Get a list of tickets",
             "defaults": {
-                "handler": "get-tickets"
+                "handler": "get-tickets",
+                "deep": 0,
+                "load": true
             },
             "argmap": ["sids"]
         },
         "close_ticket": {
             "doc": "Close a ticket",
             "defaults": {
-                "handler": "close-ticket"
+                "handler": "close-ticket",
+                "deep": 0,
+                "load": true
             },
             "argmap": ["sid"]
+        },
+        "close_tickets": {
+            "doc": "Close a list of tickets",
+            "defaults": {
+                "handler": "close-tickets",
+                "deep": 0,
+                "load": true
+            },
+            "argmap": ["sids"]
         }
     }
 }

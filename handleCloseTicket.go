@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,24 +13,42 @@ import (
 	"github.com/vmihailenco/msgpack"
 )
 
-type getTicketReq struct {
-	Sid string `msgpack:"sid"`
+type closeTicketReq struct {
+	Sid     string `msgpack:"sid"`
+	Comment string `magpack:"comment"`
 }
 
-type getTicketRes struct {
-	Tickets []interface{}
+type closeTicketBody struct {
+	Status  string `json:"status"`
+	Comment string `json:"comment"`
 }
 
-func handleGetTicket(pkg *timod.Pkg) {
-	var req getTicketReq
+func handleCloseTicket(pkg *timod.Pkg) {
+	var req closeTicketReq
+
 	err := msgpack.Unmarshal(pkg.Data, &req)
 	if err != nil {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			"Error: Failed to unpack Get Ticket request")
+			"Error: Failed to unpack Close Ticket request")
 		return
 	}
+
+	reqBody := closeTicketBody{
+		"closed",
+		req.Comment,
+	}
+
+	jsonBody, err := json.Marshal(reqBody)
+	if err != nil {
+		timod.WriteEx(
+			pkg.Pid,
+			timod.ExBadData,
+			fmt.Sprintf("Error: Failed to JSON marshal ticket (%s)", err))
+		return
+	}
+	body := bytes.NewReader(jsonBody)
 
 	params := url.Values{}
 	params.Set("sid", req.Sid)
@@ -43,10 +62,12 @@ func handleGetTicket(pkg *timod.Pkg) {
 		return
 	}
 
-	reqURL.Path = path.Join(reqURL.Path, "ticket")
+	reqURL.Path = path.Join(reqURL.Path, "ticket/status")
+	json.Marshal(reqBody)
+
 	reqURL.RawQuery = params.Encode()
 
-	httpReq, err := http.NewRequest("GET", reqURL.String(), http.NoBody)
+	httpReq, err := http.NewRequest("PUT", reqURL.String(), body)
 	if err != nil {
 		timod.WriteEx(
 			pkg.Pid,
@@ -88,17 +109,6 @@ func handleGetTicket(pkg *timod.Pkg) {
 		return
 	}
 
-	// Unpack the newTicket response
-	var response getTicketRes
-	err = json.Unmarshal(resBody, &response)
-	if err != nil {
-		timod.WriteEx(
-			pkg.Pid,
-			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to unpack response (%s)", err))
-		return
-	}
-
 	// Return the sid for the new ticket
-	timod.WriteResponse(pkg.Pid, &response.Tickets[0])
+	timod.WriteResponse(pkg.Pid, nil)
 }

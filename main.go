@@ -78,6 +78,12 @@ func onModuleReq(pkg *timod.Pkg) {
 		handleNewTicket(pkg)
 	} else if *req.Handler == "get-ticket" {
 		handleGetTicket(pkg)
+	} else if *req.Handler == "get-tickets" {
+		handleGetTickets(pkg)
+	} else if *req.Handler == "close-ticket" {
+		handleCloseTicket(pkg)
+	} else if *req.Handler == "close-tickets" {
+		handleCloseTickets(pkg)
 	} else if req.Handler == nil {
 		timod.WriteEx(
 			pkg.Pid,

@@ -14,8 +14,8 @@ import (
 )
 
 type newTicketReq struct {
-	Channel *string      `msgpack:"channel"`
-	Ticket  *interface{} `msgpack:"ticket"`
+	Channel string      `msgpack:"channel"`
+	Ticket  interface{} `msgpack:"ticket"`
 }
 
 type newTicketRes struct {
@@ -47,11 +47,9 @@ func handleNewTicket(pkg *timod.Pkg) {
 	body := bytes.NewReader(jsonBody)
 
 	params := url.Values{}
-	params.Set("channel", *req.Channel)
+	params.Set("channel", req.Channel)
 
 	reqURL, err := url.Parse(cred.URI)
-	reqURL.Path = path.Join(reqURL.Path, "ticket")
-
 	if err != nil {
 		timod.WriteEx(
 			pkg.Pid,
@@ -60,6 +58,7 @@ func handleNewTicket(pkg *timod.Pkg) {
 		return
 	}
 
+	reqURL.Path = path.Join(reqURL.Path, "ticket")
 	reqURL.RawQuery = params.Encode()
 
 	httpReq, err := http.NewRequest("POST", reqURL.String(), body)
@@ -95,12 +94,12 @@ func handleNewTicket(pkg *timod.Pkg) {
 		return
 	}
 
-	// Check status code and return error if not 201
-	if res.StatusCode != 201 {
+	// Check status code and return error if not 2XX
+	if res.StatusCode/100 != 2 {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			fmt.Sprintf("Error: %s (%d)", string(resBody), res.StatusCode))
+			fmt.Sprintf("%s (%d)", string(resBody), res.StatusCode))
 		return
 	}
 

@@ -12,27 +12,29 @@ import (
 	"github.com/vmihailenco/msgpack"
 )
 
-type getTicketReq struct {
-	Sid string `msgpack:"sid"`
+type getTicketsReq struct {
+	Sids []string `msgpack:"sids"`
 }
 
-type getTicketRes struct {
+type getTicketsRes struct {
 	Tickets []interface{}
 }
 
-func handleGetTicket(pkg *timod.Pkg) {
-	var req getTicketReq
+func handleGetTickets(pkg *timod.Pkg) {
+	var req getTicketsReq
 	err := msgpack.Unmarshal(pkg.Data, &req)
 	if err != nil {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			"Error: Failed to unpack Get Ticket request")
+			"Error: Failed to unpack Get Tickets request")
 		return
 	}
 
 	params := url.Values{}
-	params.Set("sid", req.Sid)
+	for i := 0; i < len(req.Sids); i++ {
+		params.Set("sid", req.Sids[i])
+	}
 
 	reqURL, err := url.Parse(cred.URI)
 	if err != nil {
@@ -89,7 +91,7 @@ func handleGetTicket(pkg *timod.Pkg) {
 	}
 
 	// Unpack the newTicket response
-	var response getTicketRes
+	var response getTicketsRes
 	err = json.Unmarshal(resBody, &response)
 	if err != nil {
 		timod.WriteEx(
@@ -100,5 +102,5 @@ func handleGetTicket(pkg *timod.Pkg) {
 	}
 
 	// Return the sid for the new ticket
-	timod.WriteResponse(pkg.Pid, &response.Tickets[0])
+	timod.WriteResponse(pkg.Pid, &response.Tickets)
 }
