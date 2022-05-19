@@ -70,7 +70,7 @@ func onModuleReq(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			"Error: Failed to unpack DutyCalls request")
+			"Failed to unpack DutyCalls request")
 		return
 	}
 
@@ -88,12 +88,12 @@ func onModuleReq(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			"Error: missing handler")
+			"Missing handler")
 	} else {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			fmt.Sprintf("Error: unknown handler: %s", *req.Handler))
+			fmt.Sprintf("Unknown handler: %s", *req.Handler))
 	}
 }
 
@@ -108,7 +108,7 @@ func handler(buf *timod.Buffer, quit chan bool) {
 				if err == nil {
 					handleConf(&auth)
 				} else {
-					log.Println("Error: Missing or invalid DutyCalls configuration")
+					log.Println("Missing or invalid DutyCalls configuration")
 					timod.WriteConfErr()
 				}
 
@@ -116,7 +116,7 @@ func handler(buf *timod.Buffer, quit chan bool) {
 				onModuleReq(pkg)
 
 			default:
-				log.Printf("Error: Unexpected package type: %d", pkg.Tp)
+				log.Printf("Unexpected package type: %d", pkg.Tp)
 			}
 		case err := <-buf.ErrCh:
 			// In case of an error you probably want to quit the module.
