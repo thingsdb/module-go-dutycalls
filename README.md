@@ -27,8 +27,8 @@ Example configuration:
 
 ```javascript
 set_module_conf('dutycalls', {
-    login: 'iris',
-    password: 'siri',
+    login: 'abcdefgh',
+    password: 'hgfedcba',
 });
 ```
 

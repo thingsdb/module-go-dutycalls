@@ -164,7 +164,7 @@ func onModuleReq(pkg *timod.Pkg) {
 		return
 	}
 
-	if *req.Handler == "new_ticket" {
+	if *req.Handler == "new-ticket" {
 		handleNewTicket(pkg)
 	} else if req.Handler == nil {
 		timod.WriteEx(
