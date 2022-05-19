@@ -50,7 +50,7 @@ Syntax: `new_ticket(channel, ticket)`
 #### Example:
 
 ```javascript
-siridb.new_ticket("mychannel").then(|res| {
+dutycalls.new_ticket("mychannel").then(|res| {
     res;  // just return the response.
 });
 ```
