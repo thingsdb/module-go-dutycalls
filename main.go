@@ -21,14 +21,8 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
-	"net/url"
-	"path/filepath"
 	"sync"
 
 	timod "github.com/thingsdb/go-timod"
@@ -39,6 +33,14 @@ import (
 var mux sync.Mutex
 var cred authDutyCalls
 
+// DefaultURI is the default api URI to use
+// The UIR can be changed using:
+//
+//     set_module_conf('dutycalls', {
+//         login: 'mylogin',
+//         password: 'mysecret',
+//         uri: 'https://playground.dutycalls.me/api'
+//     });
 const DefaultURI = "https://dutycalls.me/api"
 
 type authDutyCalls struct {
@@ -51,16 +53,6 @@ type dcRequest struct {
 	Handler *string `msgpack:"handler"`
 }
 
-type newTicketReq struct {
-	Channel *string      `msgpack:"channel"`
-	Ticket  *interface{} `msgpack:"ticket"`
-}
-
-type newTicketRes struct {
-	Sid     string `json:"sid"`
-	Channel string `json:"channel"`
-}
-
 func handleConf(auth *authDutyCalls) {
 	cred = *auth
 
@@ -69,88 +61,6 @@ func handleConf(auth *authDutyCalls) {
 	}
 
 	timod.WriteConfOk()
-}
-
-func handleNewTicket(pkg *timod.Pkg) {
-	var req newTicketReq
-	err := msgpack.Unmarshal(pkg.Data, &req)
-	if err != nil {
-		timod.WriteEx(
-			pkg.Pid,
-			timod.ExBadData,
-			"Error: Failed to unpack New Ticket request")
-		return
-	}
-
-	params := url.Values{}
-	jsonBody, err := json.Marshal(req.Ticket)
-	if err != nil {
-		timod.WriteEx(
-			pkg.Pid,
-			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to JSON marshal ticket (%s)", err))
-		return
-	}
-	body := bytes.NewReader(jsonBody)
-
-	params.Set("channel", *req.Channel)
-
-	uri := filepath.Join(cred.URI, "tichet")
-
-	reqURL, err := url.Parse(uri)
-
-	if err != nil {
-		timod.WriteEx(
-			pkg.Pid,
-			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to parse URI (%s) (%s)", uri, err))
-		return
-	}
-
-	reqURL.RawQuery = params.Encode()
-
-	httpReq, err := http.NewRequest("POST", reqURL.String(), body)
-	if err != nil {
-		timod.WriteEx(
-			pkg.Pid,
-			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to create request (%s)", err))
-		return
-	}
-
-	httpReq.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	res, err := client.Do(httpReq)
-	if err != nil {
-		timod.WriteEx(
-			pkg.Pid,
-			timod.ExOperation,
-			fmt.Sprintf("Error: Failed to perform the request (%s)", err))
-		return
-	}
-
-	// Read the body
-	resBody, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		timod.WriteEx(
-			pkg.Pid,
-			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to read bytes from response (%s)", err))
-		return
-	}
-
-	keys := make([]newTicketRes, 0)
-	err = json.Unmarshal(resBody, &keys)
-	if err != nil {
-		timod.WriteEx(
-			pkg.Pid,
-			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to unpack response (%s)", err))
-		return
-	}
-
-	timod.WriteResponse(pkg.Pid, &keys[0].Sid)
 }
 
 func onModuleReq(pkg *timod.Pkg) {
@@ -166,6 +76,8 @@ func onModuleReq(pkg *timod.Pkg) {
 
 	if *req.Handler == "new-ticket" {
 		handleNewTicket(pkg)
+	} else if *req.Handler == "get-ticket" {
+		handleGetTicket(pkg)
 	} else if req.Handler == nil {
 		timod.WriteEx(
 			pkg.Pid,
