@@ -12,29 +12,27 @@ import (
 	"github.com/vmihailenco/msgpack"
 )
 
-type getTicketsReq struct {
-	Sids []string `msgpack:"sids"`
+type getHitsReq struct {
+	Sid string `msgpack:"sid"`
 }
 
-type getTicketsRes struct {
-	Tickets []interface{}
+type getHitsRes struct {
+	Hits []interface{}
 }
 
-func handleGetTickets(pkg *timod.Pkg) {
-	var req getTicketsReq
+func handleGetHits(pkg *timod.Pkg) {
+	var req getHitsReq
 	err := msgpack.Unmarshal(pkg.Data, &req)
 	if err != nil {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			"Failed to unpack get-tickets request. Expecting a list of [SIDs] (list of strings)")
+			"Failed to unpack get-hits request. Expecting a SID (string)")
 		return
 	}
 
 	params := url.Values{}
-	for i := 0; i < len(req.Sids); i++ {
-		params.Set("sid", req.Sids[i])
-	}
+	params.Set("sid", req.Sid)
 
 	reqURL, err := url.Parse(cred.URI)
 	if err != nil {
@@ -45,7 +43,7 @@ func handleGetTickets(pkg *timod.Pkg) {
 		return
 	}
 
-	reqURL.Path = path.Join(reqURL.Path, "ticket")
+	reqURL.Path = path.Join(reqURL.Path, "ticket/hit")
 	reqURL.RawQuery = params.Encode()
 
 	httpReq, err := http.NewRequest("GET", reqURL.String(), http.NoBody)
@@ -91,7 +89,7 @@ func handleGetTickets(pkg *timod.Pkg) {
 	}
 
 	// Unpack the newTicket response
-	var response getTicketsRes
+	var response getHitsRes
 	err = json.Unmarshal(resBody, &response)
 	if err != nil {
 		timod.WriteEx(
@@ -102,5 +100,5 @@ func handleGetTickets(pkg *timod.Pkg) {
 	}
 
 	// Return the sid for the new ticket
-	timod.WriteResponse(pkg.Pid, &response.Tickets)
+	timod.WriteResponse(pkg.Pid, &response.Hits)
 }

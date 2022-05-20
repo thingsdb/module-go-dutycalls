@@ -27,7 +27,7 @@ func handleGetTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			"Error: Failed to unpack Get Ticket request")
+			"Failed to unpack get-ticket request. Expecting a SID (string)")
 		return
 	}
 
@@ -39,7 +39,7 @@ func handleGetTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to parse URI (%s) (%s)", reqURL.String(), err))
+			fmt.Sprintf("Failed to parse URI (%s) (%s)", reqURL.String(), err))
 		return
 	}
 
@@ -51,7 +51,7 @@ func handleGetTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to create request (%s)", err))
+			fmt.Sprintf("Failed to create request (%s)", err))
 		return
 	}
 
@@ -65,7 +65,7 @@ func handleGetTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExOperation,
-			fmt.Sprintf("Error: Failed to perform the request (%s)", err))
+			fmt.Sprintf("Failed to perform the request (%s)", err))
 		return
 	}
 
@@ -75,7 +75,7 @@ func handleGetTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to read bytes from response (%s)", err))
+			fmt.Sprintf("Failed to read bytes from response (%s)", err))
 		return
 	}
 
@@ -95,7 +95,7 @@ func handleGetTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to unpack response (%s)", err))
+			fmt.Sprintf("Failed to unpack response (%s)", err))
 		return
 	}
 

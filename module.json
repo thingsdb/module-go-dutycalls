@@ -57,6 +57,42 @@
                 "load": true
             },
             "argmap": ["sids", "comment"]
+        },
+        "unack_ticket": {
+            "doc": "Unacknowledge a ticket",
+            "defaults": {
+                "handler": "unack-ticket",
+                "deep": 0,
+                "load": true
+            },
+            "argmap": ["sid", "comment"]
+        },
+        "unack_tickets": {
+            "doc": "Unacknowledge a list of tickets",
+            "defaults": {
+                "handler": "unack-tickets",
+                "deep": 0,
+                "load": true
+            },
+            "argmap": ["sids", "comment"]
+        },
+        "new_hit": {
+            "doc": "Create a new ticket",
+            "defaults": {
+                "handler": "new-hit",
+                "deep": 1,
+                "load": true
+            },
+            "argmap": ["sid", "hit"]
+        },
+        "get_hits": {
+            "doc": "Get a hits for a ticket",
+            "defaults": {
+                "handler": "get-hits",
+                "deep": 0,
+                "load": true
+            },
+            "argmap": ["sid"]
         }
     }
 }

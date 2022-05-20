@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,29 +13,41 @@ import (
 	"github.com/vmihailenco/msgpack"
 )
 
-type getTicketsReq struct {
-	Sids []string `msgpack:"sids"`
+type newHitReq struct {
+	Sid string      `msgpack:"sid"`
+	Hit interface{} `msgpack:"hit"`
 }
 
-type getTicketsRes struct {
-	Tickets []interface{}
+type newHitRes struct {
+	Tickets []struct {
+		Sid     string
+		Channel string
+	}
 }
 
-func handleGetTickets(pkg *timod.Pkg) {
-	var req getTicketsReq
+func handleNewHit(pkg *timod.Pkg) {
+	var req newHitReq
 	err := msgpack.Unmarshal(pkg.Data, &req)
 	if err != nil {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			"Failed to unpack get-tickets request. Expecting a list of [SIDs] (list of strings)")
+			"Failed to unpack new-hit request. Expecting a SID (string) and HIT (thing)")
 		return
 	}
 
-	params := url.Values{}
-	for i := 0; i < len(req.Sids); i++ {
-		params.Set("sid", req.Sids[i])
+	jsonBody, err := json.Marshal(req.Hit)
+	if err != nil {
+		timod.WriteEx(
+			pkg.Pid,
+			timod.ExBadData,
+			fmt.Sprintf("Failed to JSON marshal hit (%s)", err))
+		return
 	}
+	body := bytes.NewReader(jsonBody)
+
+	params := url.Values{}
+	params.Set("sid", req.Sid)
 
 	reqURL, err := url.Parse(cred.URI)
 	if err != nil {
@@ -45,10 +58,10 @@ func handleGetTickets(pkg *timod.Pkg) {
 		return
 	}
 
-	reqURL.Path = path.Join(reqURL.Path, "ticket")
+	reqURL.Path = path.Join(reqURL.Path, "ticket/hit")
 	reqURL.RawQuery = params.Encode()
 
-	httpReq, err := http.NewRequest("GET", reqURL.String(), http.NoBody)
+	httpReq, err := http.NewRequest("POST", reqURL.String(), body)
 	if err != nil {
 		timod.WriteEx(
 			pkg.Pid,
@@ -90,17 +103,6 @@ func handleGetTickets(pkg *timod.Pkg) {
 		return
 	}
 
-	// Unpack the newTicket response
-	var response getTicketsRes
-	err = json.Unmarshal(resBody, &response)
-	if err != nil {
-		timod.WriteEx(
-			pkg.Pid,
-			timod.ExBadData,
-			fmt.Sprintf("Failed to unpack response (%s)", err))
-		return
-	}
-
 	// Return the sid for the new ticket
-	timod.WriteResponse(pkg.Pid, &response.Tickets)
+	timod.WriteResponse(pkg.Pid, nil)
 }

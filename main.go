@@ -81,9 +81,17 @@ func onModuleReq(pkg *timod.Pkg) {
 	} else if *req.Handler == "get-tickets" {
 		handleGetTickets(pkg)
 	} else if *req.Handler == "close-ticket" {
-		handleCloseTicket(pkg)
+		handleStatusTicket(pkg, "closed")
 	} else if *req.Handler == "close-tickets" {
-		handleCloseTickets(pkg)
+		handleStatusTickets(pkg, "closed")
+	} else if *req.Handler == "unack-ticket" {
+		handleStatusTicket(pkg, "unacknowledged")
+	} else if *req.Handler == "unack-tickets" {
+		handleStatusTickets(pkg, "unacknowledged")
+	} else if *req.Handler == "new-hit" {
+		handleNewHit(pkg)
+	} else if *req.Handler == "get-hits" {
+		handleGetHits(pkg)
 	} else if req.Handler == nil {
 		timod.WriteEx(
 			pkg.Pid,

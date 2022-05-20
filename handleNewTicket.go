@@ -32,7 +32,7 @@ func handleNewTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			"Error: Failed to unpack New Ticket request")
+			"Failed to unpack new-ticket request. Expecting a CHANNEL (string) and TICKET (thing)")
 		return
 	}
 
@@ -41,7 +41,7 @@ func handleNewTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to JSON marshal ticket (%s)", err))
+			fmt.Sprintf("Failed to JSON marshal ticket (%s)", err))
 		return
 	}
 	body := bytes.NewReader(jsonBody)
@@ -54,7 +54,7 @@ func handleNewTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to parse URI (%s) (%s)", reqURL.String(), err))
+			fmt.Sprintf("Failed to parse URI (%s) (%s)", reqURL.String(), err))
 		return
 	}
 
@@ -66,7 +66,7 @@ func handleNewTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to create request (%s)", err))
+			fmt.Sprintf("Failed to create request (%s)", err))
 		return
 	}
 
@@ -80,7 +80,7 @@ func handleNewTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExOperation,
-			fmt.Sprintf("Error: Failed to perform the request (%s)", err))
+			fmt.Sprintf("Failed to perform the request (%s)", err))
 		return
 	}
 
@@ -90,7 +90,7 @@ func handleNewTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to read bytes from response (%s)", err))
+			fmt.Sprintf("Failed to read bytes from response (%s)", err))
 		return
 	}
 
@@ -110,7 +110,7 @@ func handleNewTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to unpack response (%s)", err))
+			fmt.Sprintf("Failed to unpack response (%s)", err))
 		return
 	}
 

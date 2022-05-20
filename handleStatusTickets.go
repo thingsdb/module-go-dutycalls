@@ -13,30 +13,25 @@ import (
 	"github.com/vmihailenco/msgpack"
 )
 
-type closeTicketReq struct {
-	Sid     string `msgpack:"sid"`
-	Comment string `msgpack:"comment"`
+type closeTicketsReq struct {
+	Sids    []string `msgpack:"sids"`
+	Comment string   `magpack:"comment"`
 }
 
-type closeTicketBody struct {
-	Status  string `json:"status"`
-	Comment string `json:"comment"`
-}
-
-func handleCloseTicket(pkg *timod.Pkg) {
-	var req closeTicketReq
+func handleStatusTickets(pkg *timod.Pkg, status string) {
+	var req closeTicketsReq
 
 	err := msgpack.Unmarshal(pkg.Data, &req)
 	if err != nil {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			"Error: Failed to unpack Close Ticket request")
+			"Failed to unpack change-status-for-tickets request. Expecting a list of [SIDs] (list of strings) and optional COMMENT (string)")
 		return
 	}
 
 	reqBody := closeTicketBody{
-		"closed",
+		status,
 		req.Comment,
 	}
 
@@ -45,20 +40,22 @@ func handleCloseTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to JSON marshal ticket (%s)", err))
+			fmt.Sprintf("Failed to JSON marshal ticket (%s)", err))
 		return
 	}
 	body := bytes.NewReader(jsonBody)
 
 	params := url.Values{}
-	params.Set("sid", req.Sid)
+	for i := 0; i < len(req.Sids); i++ {
+		params.Set("sid", req.Sids[i])
+	}
 
 	reqURL, err := url.Parse(cred.URI)
 	if err != nil {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to parse URI (%s) (%s)", reqURL.String(), err))
+			fmt.Sprintf("Failed to parse URI (%s) (%s)", reqURL.String(), err))
 		return
 	}
 
@@ -72,7 +69,7 @@ func handleCloseTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to create request (%s)", err))
+			fmt.Sprintf("Failed to create request (%s)", err))
 		return
 	}
 
@@ -86,7 +83,7 @@ func handleCloseTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExOperation,
-			fmt.Sprintf("Error: Failed to perform the request (%s)", err))
+			fmt.Sprintf("Failed to perform the request (%s)", err))
 		return
 	}
 
@@ -96,7 +93,7 @@ func handleCloseTicket(pkg *timod.Pkg) {
 		timod.WriteEx(
 			pkg.Pid,
 			timod.ExBadData,
-			fmt.Sprintf("Error: Failed to read bytes from response (%s)", err))
+			fmt.Sprintf("Failed to read bytes from response (%s)", err))
 		return
 	}
 
