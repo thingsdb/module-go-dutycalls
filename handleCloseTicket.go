@@ -15,7 +15,7 @@ import (
 
 type closeTicketReq struct {
 	Sid     string `msgpack:"sid"`
-	Comment string `magpack:"comment"`
+	Comment string `msgpack:"comment"`
 }
 
 type closeTicketBody struct {
