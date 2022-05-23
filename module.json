@@ -1,6 +1,6 @@
 {
     "doc": "https://github.com/thingsdb/module-go-dutycalls#readme",
-    "version": "0.0.5",
+    "version": "0.1.0",
     "main": {
         "linux/386": "bin/dutycalls_linux_386.bin",
         "linux/amd64": "bin/dutycalls_linux_amd64.bin",

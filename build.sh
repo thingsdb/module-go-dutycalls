@@ -11,10 +11,6 @@ declare -a arr=(
     "darwin/amd64"
 )
 
-declare -a arr=(
-    "linux/amd64"
-)
-
 if [ "$OUT" == "" ]
 then
     OUT="bin/"
