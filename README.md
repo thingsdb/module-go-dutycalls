@@ -21,7 +21,7 @@ Property | Type            | Description
 -------- | --------------- | -----------
 login    | str (required)  | Login to authenticate with.
 password | str (required)  | Password / secret for the user.
-
+uri      | str (optional)  | API REST endpoint. Defaults to https://dutycalls.me/api.
 
 Example configuration:
 
